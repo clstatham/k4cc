@@ -98,7 +98,7 @@ pub enum Punctuator {
 def gen_puncutators_syntax():
     out = ""
     for key, val in PUNCTUATORS.items():
-        out += "syntax! { punc_" + key.lower() + ", \"" + val + "\", Token::Punctuator(Punctuator::" + key + ") }\n"
+        out += "syntax! { punc_" + key.lower() + ", \"" + val + "\", Punctuator, " + key + " }\n"
     return out
 
 def gen_keywords_enum():
@@ -113,7 +113,7 @@ pub enum Keyword {
 def gen_keywords_syntax():
     out = ""
     for key in KEYWORDS:
-        out += "syntax! { kw_" + key.lower() + ", \"" + key.lower() + "\", Token::Keyword(Keyword::" + key + ") }\n"
+        out += "syntax! { kw_" + key.lower() + ", \"" + key.lower() + "\", Keyword, " + key + " }\n"
     return out
 
 def gen_keywords_lexer():
@@ -158,9 +158,9 @@ use nom::IResult;
 // This is inspired / taken from `monkey-rust`
 // https://github.com/Rydgel/monkey-rust/blob/22976ecf97f6b3aa007ba2b511fc9539d7940e13/lib/lexer/mod.rs#L16
 macro_rules! syntax {
-    ($func:ident, $tag:literal, $tok:expr) => {
+    ($func:ident, $tag:literal, $typ:ident, $tok:ident) => {
         pub fn $func(s: Span<'_>) -> IResult<Span<'_>, Token<'_>> {
-            map(tag($tag), |_| $tok)(s)
+            map(tag($tag), |s| Token::$typ(s, $typ::$tok))(s)
         }
     };
 }

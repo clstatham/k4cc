@@ -22,13 +22,13 @@ pub const DIGIT: &[u8] = b"0123456789";
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Token<'a> {
-    Illegal,
-    EOI,
+    Illegal(Span<'a>),
+    EOI(Span<'a>),
     Ident(Span<'a>),
-    Constant(Constant),
+    Constant(Span<'a>, Constant),
     String(Span<'a>),
-    Keyword(Keyword),
-    Punctuator(Punctuator),
+    Keyword(Span<'a>, Keyword),
+    Punctuator(Span<'a>, Punctuator),
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -50,14 +50,15 @@ pub fn lex_ident(inp: Span<'_>) -> IResult<Span<'_>, Token<'_>> {
 
 pub fn lex_integer(inp: Span<'_>) -> IResult<Span<'_>, Token<'_>> {
     map(recognize(many1(one_of(DIGIT))), |s: Span<'_>| {
-        Token::Constant(Constant::Integer(
-            std::str::from_utf8(&s).unwrap().parse::<i64>().unwrap(),
-        ))
+        Token::Constant(
+            inp,
+            Constant::Integer(std::str::from_utf8(&s).unwrap().parse::<i64>().unwrap()),
+        )
     })(inp)
 }
 
 pub fn lex_illegal(inp: Span<'_>) -> IResult<Span<'_>, Token<'_>> {
-    map(take(1usize), |_| Token::Illegal)(inp)
+    map(take(1usize), Token::Illegal)(inp)
 }
 
 pub fn lex_token(inp: Span<'_>) -> IResult<Span<'_>, Token<'_>> {
@@ -72,7 +73,7 @@ pub fn lex_token(inp: Span<'_>) -> IResult<Span<'_>, Token<'_>> {
 
 pub fn lex_tokens(inp: Span<'_>) -> IResult<Span<'_>, Vec<Token<'_>>> {
     many0(delimited(multispace0, lex_token, multispace0))(inp)
-        .map(|(s, res)| (s, [&res[..], &[Token::EOI][..]].concat()))
+        .map(|(s, res)| (s, [&res[..], &[Token::EOI(s)][..]].concat()))
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
