@@ -5,9 +5,9 @@ use crate::lexer::{
     gen::{Keyword, Punctuator},
     Token, Tokens, WithSpan,
 };
-use crate::ParseResult;
 use nom::bytes::complete::*;
 use nom::combinator::*;
+use crate::ParseResult;
 
 // This is inspired / taken from `monkey-rust`
 // https://github.com/Rydgel/monkey-rust/blob/22976ecf97f6b3aa007ba2b511fc9539d7940e13/lib/parser/mod.rs#L15C20-L15C20
@@ -104,3 +104,4 @@ tag_token! { kw_unsigned, Keyword, Unsigned }
 tag_token! { kw_void, Keyword, Void }
 tag_token! { kw_volatile, Keyword, Volatile }
 tag_token! { kw_while, Keyword, While }
+

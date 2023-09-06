@@ -117,7 +117,7 @@ def gen_keywords_syntax():
     return out
 
 def gen_keywords_lexer():
-    out = """pub fn lex_keyword(inp: Span<'_>) -> IResult<Span<'_>, WithSpan<'_, Token<'_>>> {
+    out = """pub fn lex_keyword(inp: Span<'_>) -> LexResult<Span<'_>, WithSpan<'_, Token<'_>>> {
     alt((alt(("""
     for i in range(len(KEYWORDS)):
         key = KEYWORDS[i].lower()
@@ -130,7 +130,7 @@ def gen_keywords_lexer():
     return out
 
 def gen_punctuators_lexer():
-    out = """pub fn lex_punctuator(inp: Span<'_>) -> IResult<Span<'_>, WithSpan<'_, Token<'_>>> {
+    out = """pub fn lex_punctuator(inp: Span<'_>) -> LexResult<Span<'_>, WithSpan<'_, Token<'_>>> {
     alt((alt(("""
     puncs = list(PUNCTUATORS.keys())
     for i in range(len(puncs)):
@@ -165,13 +165,13 @@ use super::{Span, Token, WithSpan};
 use nom::branch::*;
 use nom::bytes::complete::*;
 use nom::combinator::*;
-use crate::IResult;
+use crate::LexResult;
 
 // This is inspired / taken from `monkey-rust`
 // https://github.com/Rydgel/monkey-rust/blob/22976ecf97f6b3aa007ba2b511fc9539d7940e13/lib/lexer/mod.rs#L16
 macro_rules! syntax {
     ($func:ident, $tag:literal, $typ:ident, $tok:ident) => {
-        pub fn $func(s: Span<'_>) -> IResult<Span<'_>, WithSpan<'_, Token<'_>>> {
+        pub fn $func(s: Span<'_>) -> LexResult<Span<'_>, WithSpan<'_, Token<'_>>> {
             map(tag($tag), |s| WithSpan(s, Token::$typ($typ::$tok)))(s)
         }
     };
@@ -195,13 +195,13 @@ use crate::lexer::{
 };
 use nom::bytes::complete::*;
 use nom::combinator::*;
-use crate::IResult;
+use crate::ParseResult;
 
 // This is inspired / taken from `monkey-rust`
 // https://github.com/Rydgel/monkey-rust/blob/22976ecf97f6b3aa007ba2b511fc9539d7940e13/lib/parser/mod.rs#L15C20-L15C20
 macro_rules! tag_token {
     ($func:ident, $typ:ident, $tok:ident) => {
-        pub fn $func(tokens: Tokens<'_>) -> IResult<Tokens<'_>, Tokens<'_>> {
+        pub fn $func(tokens: Tokens<'_>) -> ParseResult<Tokens<'_>, Tokens<'_>> {
             verify(take(1usize), |t: &Tokens<'_>| {
                 matches!(t.tok[0], WithSpan(_, Token::$typ($typ::$tok)))
             })(tokens)
